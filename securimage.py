@@ -42,7 +42,7 @@ class OCRTamper:
     async def run(self):
 
         for x in count(1):
-            if self.preview:
+            if await self.preview:
                 break
 
         if self.mode == 'math':
