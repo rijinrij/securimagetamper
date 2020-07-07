@@ -4,6 +4,16 @@ SQLMap tamper for breaking securimage captcha!
 
 # Installation
 
+Ubuntu
+
+```
+sudo apt-get install tesseract-ocr-eng imagemagick catimg
+```
+
+```
+pip install pytesseract
+```
+
 Put files into `sqlmap/tamper` or any related to sqlmap `tamper` folder
 
 # Usages
