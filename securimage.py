@@ -26,7 +26,7 @@ class OCRTamper:
     default_image_path = "/tmp/captcha.png"
     default_headers_path = "/tmp/headers"
 
-    def __init__(self, image_url, captcha_params, conf_headers, mode, tesseract_config=None):
+    def __init__(self, image_url, captcha_params, conf_headers, mode, tesseract_config):
         self.image_url = image_url
         self.captcha_params = captcha_params
         self.conf_headers = conf_headers
@@ -40,13 +40,11 @@ class OCRTamper:
         os.remove(self.default_image_path)
 
     async def run(self):
-
-        for x in count(1):
-            if await self.preview:
-                break
+        await self.downloadimage()
 
         if self.mode == 'math':
-            self._results = await self.calculate(self.tesseract)
+            expressions = await self.tesseract
+            self._results = await self.calculate(expressions)
         elif self.mode == 'character':
             self._results = await self.preview
         elif self.mode == 'easy':
@@ -77,19 +75,12 @@ class OCRTamper:
 
         return "&" + self.captcha_params + "=" + results
 
-    @property
     async def downloadimage(self):
-        try:
-            async with ClientSession(headers=self.conf_headers) as Session:
-                async with Session.get(self.image_url) as Response:
-                    image = await Response.read()
-                    with open(self.default_image_path, "wb+") as file:
-                        file.write(image)
-        except Exception:
-            logger.critical("Trying To Download Captcha Again")
-            return False
-
-        return True
+        async with ClientSession(headers=self.conf_headers) as Session:
+            async with Session.get(self.image_url) as Response:
+                image = await Response.read()
+                with open(self.default_image_path, "wb+") as file:
+                    file.write(image)
 
     @property
     def result(self):
@@ -106,7 +97,7 @@ class OCRTamper:
         if stderr:
             raise stderr
         else:
-            return "&" + self.captcha_params + "=" + input("Real Captcha ? :")
+            return "&" + self.captcha_params + "=" + input("Real Captcha ? : ")
 
     @property
     async def tesseract(self):
@@ -146,14 +137,14 @@ try:
 except IndexError:
     tesseract_config = None
 
-mode = input("Captcha Math Mode ? [math/character/easy]")
+mode = input("Captcha Math Mode ? [math/character/easy] ")
+
 
 def depedencies():
     pass
 
 
 def tamper(payload, **kwargs):
-
     headers = {
         "Cookie": cookie
     }
